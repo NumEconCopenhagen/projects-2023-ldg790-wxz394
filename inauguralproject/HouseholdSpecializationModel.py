@@ -23,8 +23,8 @@ class HouseholdSpecializationModelClass:
         par.omega = 0.5 
 
         # c. household production
-        par.alpha = 0.5
-        par.sigma = 1.0
+        par.alpha = np.array([0.5, 0.25, 0.75])
+        par.sigma = np.array([0.1, 0.5, 1.5])
 
         # d. wages
         par.wM = 1.0
@@ -137,9 +137,29 @@ class HouseholdSpecializationModelClass:
         y = np.log(sol.HF_vec/sol.HM_vec)
         A = np.vstack([np.ones(x.size),x]).T
         sol.beta0,sol.beta1 = np.linalg.lstsq(A,y,rcond=None)[0]
+        return sol.beta0, sol.beta1
     
-    def estimate(self,alpha=None,sigma=None):
+    def estimate(self):
         """ estimate alpha and sigma """
 
-        pass
+        par = self.par
+        sol = self.sol
+        
+        # define the function to be minimized
+        def objective(params):
+            alpha, sigma = params
+            # set the alpha and sigma parameters to the estimated values
+            par.alpha = np.array([alpha]*3)
+            par.sigma = np.array([sigma]*3)
+            # solve the model
+            self.solve_wF_vec(discrete=True)
+            beta0_hat, beta1_hat = self.run_regression()
+            # return the expression to be minimized
+            return (beta0_hat - par.beta0_target)**2 + (beta1_hat - par.beta1_target)**2
+        
+        # minimize the function
+        result = optimize.minimize(objective, x0=[0.5, 1.0])
+        # get the optimal alpha and sigma
+        alpha_opt, sigma_opt = result.x
+        return alpha_opt, sigma_opt
 
