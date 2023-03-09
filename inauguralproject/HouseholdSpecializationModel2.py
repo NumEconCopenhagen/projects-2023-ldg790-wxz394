@@ -7,7 +7,7 @@ from scipy import optimize
 import pandas as pd 
 import matplotlib.pyplot as plt
 
-class HouseholdSpecializationModelClass:
+class HouseholdSpecializationModelClass2:
 
     def __init__(self):
         """ setup model """
@@ -76,7 +76,7 @@ class HouseholdSpecializationModelClass:
         opt = SimpleNamespace()
 
         # a. all possible choices
-        x = np.linspace(0,24,49)
+        x = np.linspace(0,24,25)
         LM,HM,LF,HF = np.meshgrid(x,x,x,x) # all combinations
     
         LM = LM.ravel() # vector
